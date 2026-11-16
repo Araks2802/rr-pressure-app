@@ -1,0 +1,12 @@
+variant,bat_eligible,bat_top10_in_common,bat_rank_corr_with_main,bowl_eligible,bowl_top10_in_common,bowl_rank_corr_with_main
+main: threshold 1.4,96,10.0,1.0,102,10.0,1.0
+"threshold 1.0 (more balls, less extreme)",161,7.0,0.95,170,8.0,0.978
+threshold 1.3,118,8.0,0.988,124,9.0,0.987
+threshold 1.5,80,7.0,0.987,88,10.0,0.991
+threshold 2.0 (FanGraphs high),0,,,0,,
+IPL matches only,45,6.0,0.933,46,7.0,0.88
+T20I matches only,44,4.0,0.892,54,6.0,0.935
+second innings only,79,8.0,0.851,86,6.0,0.85
+pressure by leverage at over start (bowlers) / at arrival (batters),60,6.0,0.951,97,9.0,0.988
+usual level only (ignores pressure balls),96,9.0,0.996,102,10.0,0.997
+raw pressure average only (no shrinkage),96,5.0,0.642,102,4.0,0.665

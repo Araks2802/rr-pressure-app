@@ -1,0 +1,3 @@
+index,players,tau_a,tau_shift,tau_shift_estimate_raw,noise_sd_usual,noise_sd_pressure,typical_weight_on_own_usual,typical_weight_on_own_pressure_data
+bat,96,0.0809,0.03,-0.0154,0.1169,0.2282,0.365,0.1579
+bowl,102,0.0776,0.03,-0.0092,0.1056,0.2325,0.4119,0.1301

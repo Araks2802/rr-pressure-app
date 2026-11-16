@@ -1,0 +1,5 @@
+index,split_half_r,spearman_brown,spearman,r_min,r_max
+batters: clutch per 100,0.0532,0.1011,0.05,-0.0847,0.2087
+batters: WPA per 100 (for comparison),0.0871,0.1603,0.1035,-0.0813,0.2339
+bowlers: clutch per 100,-0.0036,-0.0071,0.007,-0.1328,0.0952
+bowlers: WPA per 100 (for comparison),0.134,0.2364,0.187,-0.0164,0.3007

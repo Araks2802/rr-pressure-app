@@ -136,9 +136,9 @@ def sf(v, d=1):
 def card(label, value, sub, hi=False): return f'<div class="card {"hi" if hi else ""}"><div class="l">{label}</div><div class="v">{value}</div><div class="s">{sub}</div></div>'
 
 
-hc = st.columns([1.2, 4.0, 2.9, 1.6])
+hc = st.columns([1.1, 4.9, 2.8, 1.6])
 hc[0].markdown('<div class="brand">RR <b>SupeRR</b> Selector</div>', unsafe_allow_html=True)
-page = hc[1].segmented_control('Page', ['Home', 'Pressure Impact', 'Clutch', 'Players', 'How it works'], default='Home', key='page', label_visibility='collapsed') or 'Home'
+page = hc[1].segmented_control('Page', ['Home', 'Pressure Impact', 'Clutch', 'Players', 'Analysis', 'How it works'], default='Home', key='page', label_visibility='collapsed') or 'Home'
 scope = hc[2].segmented_control('Data', list(SCOPE_LABEL), default='Both', key='scope', format_func=lambda s: SCOPE_LABEL[s], label_visibility='collapsed') or 'Both'
 season = hc[3].selectbox('Season', SEASONS, format_func=lambda y: 'All seasons' if y == 'All' else str(y), key='season', label_visibility='collapsed')
 role_label = {'Batters': 'bat', 'Bowlers': 'bowl'}
@@ -319,9 +319,149 @@ def page_how():
         f.add_trace(go.Scatter(x=row.over, y=row['first'], name='First innings', mode='lines', line=dict(color=BLUE, width=3.5, shape='spline'), fill='tozeroy', fillcolor='rgba(91,140,255,.12)'))
         f.add_trace(go.Scatter(x=row.over, y=row.chase, name='Chase', mode='lines', line=dict(color=PINK, width=3.5, shape='spline'), fill='tozeroy', fillcolor='rgba(232,54,143,.12)'))
         f.add_hline(y=1, line_color='rgba(190,200,230,.5)', line_dash='dot'); f.update_layout(title='Does the model make sense? Average pressure level, over by over', xaxis_title='over', yaxis_title='average pressure level (1 = an average ball)', xaxis_range=[1, 20], yaxis_range=[0, 2.5])
-        st.plotly_chart(plain(f, 420).update_layout(showlegend=True, legend=dict(orientation='h', y=1.12, x=0, font=dict(color=TXT))), use_container_width=True)
+        st.plotly_chart(plain(f, 420).update_layout(showlegend=True, legend=dict(orientation='h', y=1.0, x=1, xanchor='right', yanchor='bottom', font=dict(color=TXT))), use_container_width=True)
         st.markdown('<div class="note">In the first innings there is no target, so no ball matters much more than another. In a chase, the closer the finish, the more every ball matters, so the line climbs towards the last overs. A sensible pressure measure should look like this.</div>', unsafe_allow_html=True)
     st.write(''); st.markdown('**Can you trust it?** It predicts matches it has not seen better than guessing, but it mostly reflects how good a player is overall, and clutch barely repeats from one half of a career to the other. Treat players with close scores as tied.')
 
 
-{'Home': page_home, 'Pressure Impact': page_impact, 'Clutch': page_clutch, 'Players': page_players, 'How it works': page_how}[page]()
+def page_analysis():
+    st.markdown('<div class="title">The analysis</div><div class="sub">The full method, step by step: how pressure is defined, how players are scored, how the comparisons are kept fair, the evidence for the top 10, and how far you can trust it. Figures on this page use all seasons and IPL + T20I together.</div>', unsafe_allow_html=True)
+    t1, t2, t3, t4, t5 = st.tabs(['1 Pressure', '2 Scoring', '3 Fair comparisons', '4 Evidence', '5 Reliability'])
+    sens = pd.read_csv(DATA / 'an_sensitivity.csv'); val = pd.read_csv(DATA / 'an_validation.csv'); rel = pd.read_csv(DATA / 'an_reliability.csv').set_index('index'); par = pd.read_csv(DATA / 'an_params.csv').set_index('index')
+    crel = pd.read_csv(DATA / 'an_clutch_rel.csv').set_index('index'); wpm = pd.read_csv(DATA / 'an_wp.csv')
+    with t1:
+        l, r_ = st.columns([6, 6], gap='large')
+        with l:
+            st.markdown("""
+#### What counts as pressure
+A moment is high-pressure when the next ball can swing the match a lot. Rather than pick one ingredient (the required rate, wickets in hand, balls left), we use one number that already combines them: **leverage**.
+
+**1. Expected runs.** A Duckworth-Lewis-style curve says how many runs a typical side still scores from any point, from balls left and wickets lost, scaled to each match by its par score.
+
+**2. Win chance.** Compare what a side is on course to score with what it needs (in the first innings, with par). A smooth curve turns that ratio into a probability. Once a target is reached the chance is 100%; all out or out of balls while behind, 0%.
+
+**3. Win probability added (WPA).** The change in the batting side's win chance across a ball. The batter gets it and the bowler gets the opposite.
+
+**4. Leverage.** For every ball we list what could happen (a wicket, or 0, 1, 2, 3, 4 or 6 runs), work out the win chance after each, and weight the swings by how often each happens in that situation. Divided by the average, **1.0 is an average ball**. It is worked out before the ball, so a ball's own result never decides its leverage.
+""")
+        with r_:
+            st.markdown("""
+#### Bands and pressure balls
+- **Low:** 0.5 to 0.85
+- **Medium:** 0.85 to 1.4
+- **High:** 1.4 and above. A **pressure ball** is a high-leverage ball, about 1 in 7.
+- Balls below 0.5 are nearly decided. They count as ordinary balls for Pressure Impact and are not used for clutch.
+
+We tested the pressure boundary at 1.0, 1.3, 1.5 and 2.0 (see Evidence). At 2.0 almost no player has enough pressure balls to be rated, so 1.4 keeps the moments tense while leaving enough data.
+
+**Sense check.** About 61% of balls are below 1, and in chases 10.6% are 2 or higher. In the first innings no ball reaches 2, because without a target one ball cannot swing the win chance far. The average swing in win chance is about 40 times larger in the top tenth of balls than in the bottom tenth.
+""")
+            row = LBO[LBO.scope == 'Both'].sort_values('over'); f = go.Figure()
+            f.add_trace(go.Scatter(x=row.over, y=row['first'], mode='lines', line=dict(color=BLUE, width=3, shape='spline'), fill='tozeroy', fillcolor='rgba(91,140,255,.12)', name='First innings'))
+            f.add_trace(go.Scatter(x=row.over, y=row.chase, mode='lines', line=dict(color=PINK, width=3, shape='spline'), fill='tozeroy', fillcolor='rgba(232,54,143,.12)', name='Chase'))
+            f.add_hline(y=1, line_color='rgba(190,200,230,.5)', line_dash='dot'); f.update_layout(title='Average pressure level, over by over', xaxis_title='over', xaxis_range=[1, 20], yaxis_range=[0, 2.5])
+            st.plotly_chart(plain(f, 320).update_layout(showlegend=True, legend=dict(orientation='h', y=1.0, x=1, xanchor='right', yanchor='bottom', font=dict(color=TXT))), use_container_width=True)
+    with t2:
+        l, r_ = st.columns(2, gap='large')
+        with l:
+            st.markdown(f"""
+#### Value of every ball, in runs
+**Batters:** the change in expected runs across the ball plus runs off the bat. A boundary adds runs; a wicket removes the runs the innings was still expected to score. **Bowlers:** the same with the sign reversed, minus runs conceded: saving runs or taking a wicket is positive.
+
+#### Compared with an average player
+From each ball's value we subtract the average of all players in the same **innings, phase, leverage band and competition**. Thin cells are pulled towards their parent cell. The result is "runs above an average player facing the same thing".
+
+#### Pressure Impact
+- Two averages per player: on ordinary balls (his usual level) and on pressure balls.
+- **Shrinkage.** A pressure average is uncertain by about {par.loc['bat', 'noise_sd_pressure']:.2f} runs per ball just by chance, while real differences between players are only about {par.loc['bat', 'tau_a']:.2f}. We pull each number towards the group in proportion to how little data it has, so a lucky streak cannot top the list.
+- Reported as runs per 100 pressure balls (extra runs for batters, runs saved for bowlers), with a range.
+""")
+        with r_:
+            st.markdown("""
+#### WPA and clutch
+**WPA** is the total win probability a player added, in wins. **Clutch** is WPA divided by his average leverage, minus the same WPA with each ball divided by its own leverage. It says whether his production came more from high-stakes balls than his usual output suggests.
+
+#### Two different questions
+- **Pressure Impact** compares a player with **an average player**: how good is he when it matters?
+- **Clutch** compares him with **himself**: does he lift when the stakes rise?
+
+A player who is elite everywhere has nothing to lift to, so he can score near zero on clutch while leading on Pressure Impact.
+
+#### The combined score
+Each score is put on the same scale and combined: **80% Pressure Impact and 20% clutch**, scaled so that 50 is the average rated player and every 15 points is one standard deviation. In a test on hidden matches, giving clutch more weight steadily lowered how well the score predicted hidden pressure results, so it keeps the smaller share.
+""")
+    with t3:
+        l, r_ = st.columns(2, gap='large')
+        with l:
+            st.markdown("""
+#### Sample sizes
+- A player is rated only with at least **300 balls** (faced, or legal balls bowled) and at least **75 pressure balls**.
+- Shrinkage keeps more of a player's own number the more data he has.
+- Every rating carries a range and an evidence label based on his pressure balls (High 150 or more, Medium 100 to 149, Low under 100).
+
+#### Different match contexts
+- **Ground and year:** par scores and match factors are fitted per match, so a total of 170 is judged against its own conditions.
+- **Innings and phase:** pressure balls are compared only with balls in the same innings, phase and leverage band.
+- **Batting role:** shrinkage targets are pooled across roles, since role-specific targets predicted hidden matches worse.
+- **Exclusions:** emerging-team, DLS-affected, no-result, tied and no-ball-data matches are left out, leaving 777 matches.
+""")
+        with r_:
+            st.markdown("""
+#### IPL and T20I together
+Both competitions use the same method, but **baselines and leverage are computed within each competition and year**, so an IPL ball is compared with IPL balls and a T20I ball with T20I balls. Pooling gives each player the most data and rates players who appear in both.
+
+The whole system can also be rebuilt on each competition alone and for each season: use the **IPL + T20I / IPL only / T20I only** and **Season** filters at the top of the site. Single-season views use lower minimums (100 balls, 30 pressure balls), so they are noisier.
+""")
+            for kk_, nm in (('IPL', 'IPL only'), ('T20I', 'T20I only')):
+                a, b = R.get(('bat', kk_, 'All')), R.get(('bowl', kk_, 'All'))
+                if a is not None and b is not None: st.markdown(f"**{nm}:** top batters {', '.join(a.sort_values('combined', ascending=False).head(3).player)}; top bowlers {', '.join(b.sort_values('combined', ascending=False).head(3).player)}.")
+    with t4:
+        st.markdown('#### The top 10 (all seasons, IPL + T20I)')
+        l, r_ = st.columns(2, gap='large')
+        for col, k, nm in ((l, 'bat', 'Batters'), (r_, 'bowl', 'Bowlers')):
+            d = R[(k, 'Both', 'All')].sort_values('combined', ascending=False).head(10)
+            with col:
+                st.markdown(f'**{nm}**'); html_table(pd.DataFrame({'#': np.arange(1, 11), 'Player': d.player.values, 'Score': d.combined.values, 'Impact': d.rating_per100.values, 'Clutch': d.clutch.values, 'Balls': d.p_n.astype(int).values}),
+                                                    kinds={'#': 'rank', 'Player': 'player', 'Score': 'num', 'Impact': 'signed', 'Clutch': 'signed', 'Balls': 'num'}, fmts={'Score': lambda v: f'{v:.0f}', 'Impact': lambda v: sf(v, 1), 'Clutch': lambda v: sf(v, 2)})
+        st.caption('Score = combined score. Impact = Pressure Impact. Balls = pressure balls faced or bowled. Players a few points apart are effectively tied.')
+        st.markdown('#### Pressure Impact and clutch side by side')
+        rows = []
+        for nm in ('Suryakumar Yadav', 'Heinrich Klaasen', 'Rinku Singh'):
+            rb = R[('bat', 'Both', 'All')]; rr_ = rb[rb.player == nm]
+            if rr_.empty: continue
+            rr_ = rr_.iloc[0]; g = BS['bat'][BS['bat'].pid == rr_.pid].groupby('fg').sum(numeric_only=True); hi = g.loc['High']; lo = g.drop('High').sum()
+            rows.append({'Batter': nm, 'Balls (ordinary / pressure)': f'{int(lo.balls)} / {int(hi.balls)}', 'Strike rate (ordinary / pressure)': f'{100 * lo.runs / lo.balls:.0f} / {100 * hi.runs / hi.balls:.0f}', 'Pressure Impact': rr_.rating_per100, 'Clutch': rr_.clutch})
+        if rows: html_table(pd.DataFrame(rows), kinds={'Batter': 'player', 'Pressure Impact': 'signed', 'Clutch': 'signed'}, fmts={'Pressure Impact': lambda v: sf(v, 1), 'Clutch': lambda v: sf(v, 2)})
+        st.markdown('<div class="note">Suryakumar Yadav bats at the same speed whether or not the pressure is on, which is elite and earns a high Pressure Impact but no clutch credit. Rinku Singh lifts clearly under pressure from a lower base, which gives a high clutch score and a modest Pressure Impact.</div>', unsafe_allow_html=True)
+        st.markdown('#### How firm are the lists?')
+        nice = {'main: threshold 1.4': 'Main method (high band, 1.4 and above)', 'threshold 1.0 (more balls, less extreme)': 'Pressure threshold 1.0', 'threshold 1.3': 'Pressure threshold 1.3', 'threshold 1.5': 'Pressure threshold 1.5', 'threshold 2.0 (FanGraphs high)': 'Pressure threshold 2.0 (too few players to rate)',
+                'IPL matches only': 'IPL matches only', 'T20I matches only': 'T20I matches only', 'second innings only': 'Second-innings balls only', 'pressure by leverage at over start (bowlers) / at arrival (batters)': 'Pressure at start of over / arrival of batter',
+                'usual level only (ignores pressure balls)': 'Rank by usual level only', 'raw pressure average only (no shrinkage)': 'Rank by raw pressure average (no luck removed)'}
+        sv = pd.DataFrame([{'If we change this': nice[x.variant], 'Batters kept (of 10)': ('n/a' if pd.isna(x.bat_top10_in_common) else int(x.bat_top10_in_common)), 'Bowlers kept (of 10)': ('n/a' if pd.isna(x.bowl_top10_in_common) else int(x.bowl_top10_in_common))} for x in sens.itertuples() if x.variant in nice])
+        html_table(sv, kinds={'If we change this': 'player', 'Batters kept (of 10)': 'num', 'Bowlers kept (of 10)': 'num'})
+    with t5:
+        l, r_ = st.columns(2, gap='large')
+        sk = lambda s, key: float(val[(val.setting == s) & (val.level_1.str.startswith(key))]['skill vs overall mean'].iloc[0]) * 100
+        with l:
+            st.markdown('#### Does it predict hidden matches?')
+            st.markdown('We hid part of each player\'s matches, built the ratings on the rest, and checked how well each method predicted the hidden pressure results: random halves (30 repeats), and building on 2022 to 2024 to predict 2025 to 2026. Below, how much better (+) or worse (-) each method did than guessing the overall average for everyone.')
+            rv = pd.DataFrame([{'Method': lbl, 'Batters, random': sk('bat | random', key), 'Batters, forward': sk('bat | time', key), 'Bowlers, random': sk('bowl | random', key), 'Bowlers, forward': sk('bowl | time', key)} for lbl, key in (('Raw pressure average', 'raw pressure average'), ('Raw usual average', 'raw usual average'), ('Our Pressure Impact', 'OUR FINAL MODEL'))])
+            html_table(rv, kinds={'Method': 'player', **{c_: 'signed' for c_ in rv.columns[1:]}}, fmts={c_: (lambda v: f'{v:+.1f}%') for c_ in rv.columns[1:]})
+            st.markdown('The raw pressure average does far worse than guessing because it follows luck. Our rating beats guessing for bowlers in both tests and for batters on random halves, but going forward in time batter ratings are only about as good as guessing, so treat batter rankings with extra caution.')
+            st.markdown('#### Does it agree with itself?')
+            st.markdown(f"Splitting each player's matches into two random halves, the Pressure Impact agrees **{rel.loc['batters', 'our_rating_split_half_r']:.2f}** (batters) and **{rel.loc['bowlers', 'our_rating_split_half_r']:.2f}** (bowlers), against {rel.loc['batters', 'raw_pressure_average_split_half_r']:.2f} and {rel.loc['bowlers', 'raw_pressure_average_split_half_r']:.2f} for the raw pressure average. Clutch agrees only **{crel.loc['batters: clutch per 100', 'split_half_r']:.2f}** and **{crel.loc['bowlers: clutch per 100', 'split_half_r']:.2f}**, essentially none, so it is mostly luck and carries only 20% of the combined score.")
+        with r_:
+            st.markdown(f"""
+#### Limitations
+- **Pressure skill is hard to separate from overall quality.** The estimated real "rise or dip" under pressure is about zero. Ratings are mostly overall quality, with pressure balls as extra evidence.
+- **Ranks beyond the first few are not firm.** Several players are effectively tied.
+- **Clutch is noisy.** It compares a player with himself, so elite players score near zero. Nearly decided balls (leverage below 0.5) are left out of it.
+- **Pressure here means high leverage, which is almost all second-innings play.** A first-innings collapse is not picked out.
+- **The model ignores who is bowling or batting.** A batter facing weaker attacks gets some credit he has not earned. IPL chasing sides also win slightly more than the model says (about 50.1% against 47.8%).
+- **Win-chance accuracy:** in chases the model ranks winners above losers {wpm.loc[wpm.innings.astype(str) == '2', 'AUC'].iloc[0] * 100:.0f}% of the time; in the first innings {wpm.loc[wpm.innings.astype(str) == '1', 'AUC'].iloc[0] * 100:.0f}%, which is natural before the opponent has batted.
+- **Big games and per-opponent figures are small samples.** Knockouts are about 4% of balls.
+- **Availability:** some listed players are not in an IPL 2026 squad.
+""")
+
+
+{'Home': page_home, 'Pressure Impact': page_impact, 'Clutch': page_clutch, 'Players': page_players, 'Analysis': page_analysis, 'How it works': page_how}[page]()
