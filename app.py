@@ -19,22 +19,38 @@ W_IMPACT, W_CLUTCH = 0.8, 0.2
 st.set_page_config(page_title='Who Delivers When It Matters?', page_icon='🏏', layout='wide', initial_sidebar_state='collapsed')
 st.markdown(f"""
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap');
 [data-testid="stSidebar"], [data-testid="collapsedControl"], header[data-testid="stHeader"] {{ display: none; }}
-h4 {{ margin-top: 1.6rem; }}
-.stApp {{ background: #0E1320; }}
+.stApp {{ background: radial-gradient(900px 420px at 0% -8%, rgba(232,54,143,.13), transparent 60%), radial-gradient(900px 480px at 100% 0%, rgba(91,140,255,.12), transparent 55%), #0C111D; }}
 .block-container {{ max-width: 1440px; padding: 1.4rem 3rem 3rem 3rem; }}
-html, body, [class*="css"] {{ font-family: 'Helvetica Neue', Arial, sans-serif; }}
-h1, h2, h3, h4 {{ color: {TXT}; }}
-.brand {{ font-weight:700; letter-spacing:.06em; font-size:.85rem; color:{MUTED}; text-transform:uppercase; }} .brand b {{ color:{PINK}; }}
-.title {{ font-size: 2.6rem; font-weight: 800; color:{TXT}; margin: 22px 0 6px 0; }} .sub {{ color:{MUTED}; font-size:1.12rem; margin-bottom: 20px; max-width: 900px; }}
-.card {{ background:{CARD}; border:1px solid rgba(150,165,210,.2); border-radius: 8px; padding: 18px 22px; height: 100%; min-height: 128px; }}
-.card .l {{ font-size:.75rem; color:{MUTED}; text-transform:uppercase; letter-spacing:.06em; }} .card .v {{ font-size: 2.1rem; font-weight: 700; color:{TXT}; line-height:1.15; }}
-.card .s {{ color:#B3BCD8; font-size:.9rem; margin-top:2px; }} .card.hi {{ border-left: 4px solid {PINK}; }}
-.pod {{ background:{CARD}; border:1px solid rgba(150,165,210,.2); border-radius: 8px; padding: 18px 22px; border-top: 4px solid {PINK}; }}
-.pod .rk {{ font-size: 2.4rem; font-weight: 800; line-height: 1; }} .pod .nm {{ font-size: 1.35rem; font-weight: 700; color:{TXT}; margin-top: 6px; }} .pod .tm {{ color:{MUTED}; font-size:.9rem; }}
-.pod .row {{ display:flex; gap: 22px; margin-top: 12px; }} .pod .row div {{ font-size:.78rem; color:{MUTED}; text-transform:uppercase; letter-spacing:.05em; }} .pod .row b {{ display:block; font-size:1.25rem; color:{TXT}; text-transform:none; letter-spacing:0; }}
+html, body, [class*="css"], .stMarkdown, button, input {{ font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; }}
+h1, h2, h3, h4, .title, .card .v, .pod .rk, .pod .nm, .pod .big {{ font-family: 'Poppins', 'Inter', sans-serif; }}
+h1, h2, h3, h4 {{ color: {TXT}; letter-spacing: -.01em; }} h4 {{ margin-top: 1.6rem; font-weight: 600; }}
+.brand {{ font-family:'Poppins',sans-serif; font-weight:600; letter-spacing:.1em; font-size:.8rem; color:{MUTED}; text-transform:uppercase; }} .brand b {{ color:{PINK}; }}
+.title {{ font-size: 2.7rem; font-weight: 700; color:{TXT}; margin: 22px 0 6px 0; letter-spacing:-.02em; }} .sub {{ color:{MUTED}; font-size:1.08rem; margin-bottom: 22px; max-width: 880px; line-height:1.55; }}
+.card {{ background: linear-gradient(160deg, #181F33, #121828); border:1px solid rgba(150,165,210,.16); border-radius: 14px; padding: 18px 22px; height: 100%; min-height: 128px; box-shadow: 0 8px 24px rgba(0,0,0,.25); }}
+.card .l {{ font-size:.72rem; color:{MUTED}; text-transform:uppercase; letter-spacing:.09em; font-weight:600; }} .card .v {{ font-size: 2.1rem; font-weight: 700; color:{TXT}; line-height:1.2; margin: 2px 0; }}
+.card .s {{ color:#AEB8D6; font-size:.88rem; line-height:1.45; }} .card.hi {{ border-top: 3px solid {PINK}; }}
+.pod {{ background: linear-gradient(160deg, #181F33, #121828); border:1px solid rgba(150,165,210,.16); border-radius: 14px; padding: 18px 22px; border-top: 4px solid {PINK}; box-shadow: 0 8px 24px rgba(0,0,0,.25); }}
+.pod .rk {{ font-size: 2.2rem; font-weight: 800; line-height: 1; }} .pod .nm {{ font-size: 1.3rem; font-weight: 600; color:{TXT}; margin-top: 6px; }} .pod .tm {{ color:{MUTED}; font-size:.88rem; }}
+.pod .row {{ display:flex; gap: 26px; margin-top: 14px; }} .pod .row div {{ font-size:.7rem; color:{MUTED}; text-transform:uppercase; letter-spacing:.08em; font-weight:600; }} .pod .row b {{ display:block; font-family:'Poppins',sans-serif; font-size:1.3rem; color:{TXT}; text-transform:none; letter-spacing:0; margin-top:2px; }}
 .pod.g1 {{ border-top-color:#F2C14E; }} .pod.g1 .rk {{ color:#F2C14E; }} .pod.g2 {{ border-top-color:#C9D2E8; }} .pod.g2 .rk {{ color:#C9D2E8; }} .pod.g3 {{ border-top-color:#D58A4B; }} .pod.g3 .rk {{ color:#D58A4B; }}
-.note {{ background:{CARD}; border-left: 4px solid {PINK}; padding: 10px 14px; color:#C9D1EC; border-radius: 4px; font-size:.95rem; }}
+.note {{ background: rgba(232,54,143,.06); border: 1px solid rgba(232,54,143,.22); border-left: 4px solid {PINK}; padding: 12px 16px; color:#D3DAF2; border-radius: 10px; font-size:.95rem; line-height:1.55; }}
+.tblwrap {{ overflow: auto; border-radius: 12px; }} .tblwrap::-webkit-scrollbar {{ width: 8px; }} .tblwrap::-webkit-scrollbar-thumb {{ background: rgba(150,165,210,.25); border-radius: 8px; }}
+table.t {{ width:100%; border-collapse: separate; border-spacing: 0 5px; font-size: .92rem; }}
+table.t th {{ border: 0 !important; position: sticky; top: 0; z-index: 2; background: #0C111D; color:{MUTED}; font-size:.68rem; font-weight:600; text-transform:uppercase; letter-spacing:.09em; text-align:left; padding: 6px 10px; }}
+table.t td {{ background: rgba(255,255,255,.035); padding: 9px 10px; color:#DCE2F5; border: 0 !important; white-space: nowrap; }}
+table.t td:first-child {{ border-radius: 10px 0 0 10px; }} table.t td:last-child {{ border-radius: 0 10px 10px 0; }}
+table.t tr:hover td {{ background: rgba(232,54,143,.08); }}
+table.t .num, table.t th.num {{ text-align:right; }} table.t td b {{ color:#fff; font-weight:600; }}
+.rkb {{ display:inline-block; min-width: 26px; height: 26px; line-height: 26px; text-align:center; border-radius: 50%; background: rgba(150,165,210,.14); color:{TXT}; font-weight:600; font-size:.8rem; }}
+.rkb.r1 {{ background:#F2C14E; color:#1b1500; }} .rkb.r2 {{ background:#C9D2E8; color:#10151f; }} .rkb.r3 {{ background:#D58A4B; color:#1d1004; }}
+.pill {{ display:inline-block; padding: 2px 10px; border-radius: 999px; background: rgba(91,140,255,.16); color:#AFC4FF; font-size:.78rem; font-weight:600; letter-spacing:.03em; }}
+.barwrap {{ display:inline-block; vertical-align:middle; width: 64px; height: 7px; border-radius: 6px; background: rgba(255,255,255,.08); margin-right: 8px; overflow:hidden; }} .barwrap i {{ display:block; height:100%; border-radius:6px; background: linear-gradient(90deg, {BLUE}, {PINK}); }}
+.pos {{ color:#5FE0A3; font-weight:600; }} .neg {{ color:#FF7A8A; font-weight:600; }} .zero {{ color:{MUTED}; }}
+.lab {{ display:inline-block; padding: 2px 10px; border-radius: 6px; font-size:.78rem; font-weight:600; }}
+.lab.up {{ background: rgba(95,224,163,.14); color:#5FE0A3; }} .lab.mid {{ background: rgba(150,165,210,.14); color:#C3CBE6; }} .lab.down {{ background: rgba(255,122,138,.14); color:#FF7A8A; }}
+tr.tot td {{ background: rgba(232,54,143,.09); }}
 </style>""", unsafe_allow_html=True)
 
 
@@ -70,9 +86,51 @@ team_of = lambda x: sh(x) if isinstance(x, str) else '-'
 
 
 def plain(fig, h=380):
-    fig.update_layout(height=h, margin=dict(l=6, r=6, t=44, b=6), plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font=dict(color=TXT), title_font_size=15, showlegend=False, hoverlabel=dict(bgcolor=CARD, font_color=TXT))
-    fig.update_xaxes(gridcolor=GRID, zerolinecolor=MUTED); fig.update_yaxes(gridcolor=GRID, zerolinecolor=MUTED)
+    fig.update_layout(height=h, margin=dict(l=6, r=10, t=46, b=6), plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font=dict(color=TXT, family='Inter, sans-serif', size=12), title_font=dict(size=15, family='Poppins, Inter, sans-serif'), showlegend=False,
+                      hoverlabel=dict(bgcolor='#181F33', bordercolor='rgba(150,165,210,.3)', font=dict(color=TXT, family='Inter, sans-serif')))
+    fig.update_xaxes(gridcolor='rgba(150,165,210,.09)', zerolinecolor='rgba(150,165,210,.45)', zerolinewidth=1.2, linecolor='rgba(150,165,210,.2)', tickfont=dict(color=MUTED), title_font=dict(color=MUTED, size=12))
+    fig.update_yaxes(gridcolor='rgba(150,165,210,.09)', zerolinecolor='rgba(150,165,210,.45)', zerolinewidth=1.2, linecolor='rgba(150,165,210,.2)', tickfont=dict(color=MUTED), title_font=dict(color=MUTED, size=12))
     return fig
+
+
+def lollipop(names, vals, title, fmt='{:+.1f}', h=460, hover='', cs=((0, '#5B8CFF'), (1, '#E8368F'))):
+    """Horizontal lollipop chart: a thin stem, a coloured dot and the value written beside it."""
+    names, vals = list(names), [float(v) for v in vals]; lo, hi = min(vals + [0]), max(vals + [0]); pad = (hi - lo) * 0.14 or 1
+    sx, sy = [], []
+    for n_, v_ in zip(names, vals): sx += [0, v_, None]; sy += [n_, n_, None]
+    fig = go.Figure(go.Scatter(x=sx, y=sy, mode='lines', line=dict(color='rgba(150,165,210,.35)', width=3), hoverinfo='skip'))
+    fig.add_trace(go.Scatter(x=vals, y=names, mode='markers+text', text=[fmt.format(v) for v in vals], textposition=['middle right' if v >= 0 else 'middle left' for v in vals], textfont=dict(color=TXT, size=12),
+                             marker=dict(size=17, color=vals, colorscale=[list(c) for c in cs], line=dict(color='#0C111D', width=2)), hovertemplate='<b>%{y}</b><br>%{x:+.2f}' + hover + '<extra></extra>', cliponaxis=False))
+    fig.update_layout(title=title, xaxis_range=[lo - pad * (1.4 if lo < 0 else 0), hi + pad], yaxis=dict(categoryorder='array', categoryarray=names[::-1], showgrid=False)); return plain(fig, h)
+
+
+def html_table(df, kinds=None, fmts=None, height=None, last_total=False):
+    """A styled HTML table. kinds: column -> rank | player | team | bar | signed | label | num | text."""
+    kinds, fmts = kinds or {}, fmts or {}
+    def isnan(v):
+        try: return pd.isna(v)
+        except Exception: return False
+    th = ''.join(f'<th class="{"num" if kinds.get(c) in ("num", "signed", "bar") else ""}">{c}</th>' for c in df.columns); rows = []
+    for ri, (_, r) in enumerate(df.iterrows()):
+        tds = []
+        for c in df.columns:
+            v = r[c]; kd = kinds.get(c, 'text'); txt = '-' if isnan(v) else (fmts[c](v) if c in fmts else v)
+            if kd == 'rank': rk = int(v); cell = f'<span class="rkb {"r" + str(rk) if rk <= 3 else ""}">{rk}</span>'
+            elif kd == 'player': cell = f'<b>{txt}</b>'
+            elif kd == 'team': cell = f'<span class="pill">{txt}</span>' if txt != '-' else '<span class="zero">-</span>'
+            elif kd == 'bar': w = 0 if isnan(v) else max(0, min(100, (float(v) - 40) / 60 * 100)); cell = f'<span class="barwrap"><i style="width:{w:.0f}%"></i></span>{txt}'
+            elif kd == 'signed': cls = 'zero' if isnan(v) or float(v) == 0 else ('pos' if float(v) > 0 else 'neg'); cell = f'<span class="{cls}">{txt}</span>'
+            elif kd == 'label': cell = f'<span class="lab {"up" if txt in ("Excellent", "Great", "Above Average") else "down" if txt in ("Below Average", "Poor", "Awful") else "mid"}">{txt}</span>'
+            else: cell = str(txt)
+            tds.append(f'<td class="{"num" if kd in ("num", "signed", "bar") else ""}">{cell}</td>')
+        rows.append(f'<tr class="{"tot" if last_total and ri == len(df) - 1 else ""}">{"".join(tds)}</tr>')
+    style = f' style="max-height:{height}px"' if height else ''
+    st.markdown(f'<div class="tblwrap"{style}><table class="t"><thead><tr>{th}</tr></thead><tbody>{"".join(rows)}</tbody></table></div>', unsafe_allow_html=True)
+
+
+def sf(v, d=1):
+    v = 0.0 if abs(v) < 0.5 * 10 ** -d else v          # avoid showing -0.00
+    return f'{v:+.{d}f}' if v != 0 else f'{0:.{d}f}'
 
 
 def card(label, value, sub, hi=False): return f'<div class="card {"hi" if hi else ""}"><div class="l">{label}</div><div class="v">{value}</div><div class="s">{sub}</div></div>'
@@ -109,25 +167,26 @@ def page_home():
         r = top.iloc[i]; pc[i].markdown(f'<div class="pod g{i + 1}"><div class="rk">{i + 1}</div><div class="nm">{r.player}</div><div class="tm">{r.ipl_2026_team if isinstance(r.ipl_2026_team, str) else "not in a 2026 squad"}</div>'
                                         f'<div class="row"><div>Score<b>{r.combined:.0f}</b></div><div>Pressure Impact<b>{f1(r.rating_per100)}</b></div><div>Clutch<b>{f1(r.clutch, 2)}</b></div></div></div>', unsafe_allow_html=True)
     st.write('')
-    left, right = st.columns([5, 7], gap='large')
+    left, right = st.columns([6, 6], gap='large')
     with left:
         st.markdown('#### Top 10')
-        tb = pd.DataFrame({'Rank': np.arange(1, 11), 'Player': top.player, 'Team': top.ipl_2026_team.map(team_of), 'Score': top.combined.round(0), 'Impact': top.rating_per100.round(1), 'Clutch': top.clutch.round(2)})
-        st.dataframe(tb, hide_index=True, use_container_width=True, height=390, column_config={'Score': st.column_config.NumberColumn(format='%.0f'), 'Impact': st.column_config.NumberColumn(format='%.1f'), 'Clutch': st.column_config.NumberColumn(format='%.2f')})
+        tb = pd.DataFrame({'#': np.arange(1, 11), 'Player': top.player.values, 'Team': top.ipl_2026_team.map(team_of).values, 'Score': top.combined.values, 'Impact': top.rating_per100.values, 'Clutch': top.clutch.values})
+        html_table(tb, kinds={'#': 'rank', 'Player': 'player', 'Team': 'team', 'Score': 'bar', 'Impact': 'signed', 'Clutch': 'signed'}, fmts={'Score': lambda v: f'<b>{v:.0f}</b>', 'Impact': lambda v: sf(v, 1), 'Clutch': lambda v: sf(v, 2)}, height=640)
         st.caption('Score = combined score. Impact = Pressure Impact (extra runs per 100 pressure balls for batters, runs saved for bowlers). Players with nearly the same score are effectively tied.')
     with right:
         st.markdown('#### Who is who')
         t = d.copy(); t['top'] = t.index < 10; f = go.Figure(); ymid = 0.0 if k == 'bowl' else t.rating_per100.median()       # bowlers are split at an average player (zero); batters at the middle rated player
-        pos = ['top center', 'bottom center', 'middle right', 'middle left']
-        for flag, col, sz in ((False, 'rgba(120,140,200,.55)', 8), (True, PINK, 11)):
-            s_ = t[t.top == flag]
-            f.add_trace(go.Scatter(x=s_.clutch, y=s_.rating_per100, mode='markers+text' if flag else 'markers', text=s_.player.str.split().str[-1] if flag else None, textposition=[pos[i % 4] for i in range(len(s_))] if flag else None, textfont=dict(color=TXT, size=11), marker=dict(size=sz, color=col),
-                                   customdata=s_.player, hovertemplate='<b>%{customdata}</b><br>Pressure Impact %{y:+.1f}<br>Clutch %{x:+.2f}<extra></extra>'))
-        f.add_vline(x=0, line_color=MUTED); f.add_hline(y=ymid, line_color=MUTED)
         xr = max(t.clutch.abs().max() * 1.08, 0.5); y0, y1 = min(t.rating_per100.min(), ymid) - 2, t.rating_per100.max() + 3
-        for tx, ty, txt, anc, va in ((xr, y1, 'Rise and deliver', 'right', 'top'), (-xr, y1, 'Good', 'left', 'top'), (xr, y0, 'Rise, but below average', 'right', 'bottom'), (-xr, y0, 'Struggle when it counts', 'left', 'bottom')):
-            f.add_annotation(x=tx, y=ty, text=f'<b>{txt}</b>', showarrow=False, font=dict(color=MUTED, size=13), xanchor=anc, yanchor=va)
-        f.update_layout(title='', xaxis_title='Clutch: does he lift above his own level? →', yaxis_title='Pressure Impact: vs an average player →', xaxis_range=[-xr, xr], yaxis_range=[y0, y1]); st.plotly_chart(plain(f, 470), use_container_width=True)
+        for (xa, xb, ya, yb, col) in ((0, xr, ymid, y1, 'rgba(232,54,143,.07)'), (-xr, 0, ymid, y1, 'rgba(91,140,255,.07)'), (0, xr, y0, ymid, 'rgba(95,224,163,.04)'), (-xr, 0, y0, ymid, 'rgba(255,122,138,.05)')):
+            f.add_shape(type='rect', x0=xa, x1=xb, y0=ya, y1=yb, fillcolor=col, line=dict(width=0), layer='below')
+        pos = ['top center', 'bottom center', 'middle right', 'middle left']
+        s_ = t[~t.top]; f.add_trace(go.Scatter(x=s_.clutch, y=s_.rating_per100, mode='markers', marker=dict(size=9, color='rgba(140,160,215,.55)', line=dict(color='rgba(12,17,29,.9)', width=1)), customdata=s_.player, hovertemplate='<b>%{customdata}</b><br>Pressure Impact %{y:+.1f}<br>Clutch %{x:+.2f}<extra></extra>'))
+        s_ = t[t.top]; f.add_trace(go.Scatter(x=s_.clutch, y=s_.rating_per100, mode='markers+text', text=s_.player.str.split().str[-1], textposition=[pos[i % 4] for i in range(len(s_))], textfont=dict(color=TXT, size=12, family='Poppins, Inter, sans-serif'),
+                                              marker=dict(size=15, color=PINK, line=dict(color='white', width=1.8)), customdata=s_.player, hovertemplate='<b>%{customdata}</b><br>Pressure Impact %{y:+.1f}<br>Clutch %{x:+.2f}<extra></extra>'))
+        f.add_vline(x=0, line_color='rgba(150,165,210,.5)', line_width=1.2); f.add_hline(y=ymid, line_color='rgba(150,165,210,.5)', line_width=1.2)
+        for tx, ty, txt, anc, va in ((xr, y1, 'RISE AND DELIVER', 'right', 'top'), (-xr, y1, 'GOOD', 'left', 'top'), (xr, y0, 'RISE, BUT BELOW AVERAGE', 'right', 'bottom'), (-xr, y0, 'STRUGGLE WHEN IT COUNTS', 'left', 'bottom')):
+            f.add_annotation(x=tx, y=ty, text=f'<b>{txt}</b>', showarrow=False, font=dict(color='rgba(190,200,230,.75)', size=11, family='Poppins, Inter, sans-serif'), xanchor=anc, yanchor=va)
+        f.update_layout(title='', xaxis_title='Clutch: does he lift above his own level? →', yaxis_title='Pressure Impact: vs an average player →', xaxis_range=[-xr, xr], yaxis_range=[y0, y1]); st.plotly_chart(plain(f, 560), use_container_width=True)
         st.caption(('Up means better than an average player (the horizontal line is zero). ' if k == 'bowl' else 'Up means a higher Pressure Impact than the typical rated player in this view (the horizontal line is the middle player). ') + 'Right means he does better when it matters than his own usual level. Labelled dots are the combined top 10.')
 
 
@@ -135,14 +194,13 @@ def page_impact():
     st.markdown('<div class="title">Pressure Impact</div><div class="sub">For batters, Pressure Impact is the <b>extra runs</b> a player adds per 100 pressure balls. For bowlers it is the <b>runs saved</b>. Both are compared with an average player in the same situation. Pressure balls are the ones that can swing the match most (about 1 in 7). Players need at least 75 pressure balls to be rated.</div>', unsafe_allow_html=True)
     k = role_pick('imp_role'); d = cur(k)
     if d is None: return
-    d = d.sort_values('rating_per100', ascending=False).reset_index(drop=True); t = d.head(10).iloc[::-1]
+    d = d.sort_values('rating_per100', ascending=False).reset_index(drop=True); t = d.head(10)
     left, right = st.columns(2, gap='large')
-    with left:
-        f = go.Figure(go.Bar(x=t.rating_per100, y=t.player, orientation='h', marker_color=PINK, hovertemplate='<b>%{y}</b><br>%{x:+.1f} '+runs_word(k)+' per 100 pressure balls<extra></extra>'))
-        f.update_layout(title='Top 10: '+runs_word(k)+' per 100 pressure balls'); st.plotly_chart(plain(f, 460), use_container_width=True)
+    with left: st.plotly_chart(lollipop(t.player, t.rating_per100, 'Top 10: ' + runs_word(k) + ' per 100 pressure balls', hover=' ' + runs_word(k) + ' per 100 pressure balls'), use_container_width=True)
     with right:
-        tb = pd.DataFrame({'Rank': np.arange(1, len(d) + 1), 'Player': d.player, 'Team': d.ipl_2026_team.map(team_of), 'Pressure Impact': d.rating_per100.round(1), 'Pressure balls': d.p_n.astype(int)})
-        st.markdown('#### All rated players'); st.dataframe(tb, hide_index=True, use_container_width=True, height=440)
+        st.markdown('#### All rated players')
+        tb = pd.DataFrame({'#': np.arange(1, len(d) + 1), 'Player': d.player, 'Team': d.ipl_2026_team.map(team_of), 'Pressure Impact': d.rating_per100.values, 'Pressure balls': d.p_n.astype(int).values})
+        html_table(tb, kinds={'#': 'rank', 'Player': 'player', 'Team': 'team', 'Pressure Impact': 'signed', 'Pressure balls': 'num'}, fmts={'Pressure Impact': lambda v: sf(v, 1)}, height=500)
 
 
 def page_clutch():
@@ -155,16 +213,16 @@ def page_clutch():
                     'Bumrah is elite in both, so there is no gap to reward and his score ends up near zero. Clutch measures rising, not being good, which is why it makes up only 20% of the combined score.</div>', unsafe_allow_html=True)
     st.write(''); k = role_pick('cl_role'); d = cur(k)
     if d is None: return
-    d = d.sort_values('clutch', ascending=False).reset_index(drop=True); t = d.head(10).iloc[::-1]
+    d = d.sort_values('clutch', ascending=False).reset_index(drop=True); t = d.head(10)
     left, right = st.columns(2, gap='large')
-    with left:
-        f = go.Figure(go.Bar(x=t.clutch, y=t.player, orientation='h', marker_color=BLUE, hovertemplate='<b>%{y}</b><br>clutch %{x:+.2f}<extra></extra>')); f.update_layout(title='Top 10 by clutch score'); st.plotly_chart(plain(f, 460), use_container_width=True)
+    with left: st.plotly_chart(lollipop(t.player, t.clutch, 'Top 10 by clutch score', fmt='{:+.2f}', hover=' clutch', cs=((0, '#3F5FB8'), (1, '#7FD6FF'))), use_container_width=True)
     with right:
-        tb = pd.DataFrame({'Rank': np.arange(1, len(d) + 1), 'Player': d.player, 'Team': d.ipl_2026_team.map(team_of), 'Clutch': d.clutch.round(2), 'Rating': d.clutch.map(clutch_rating), 'Pressure Impact': d.rating_per100.round(1)})
-        st.markdown('#### All rated players'); st.dataframe(tb, hide_index=True, use_container_width=True, height=440)
+        st.markdown('#### All rated players')
+        tb = pd.DataFrame({'#': np.arange(1, len(d) + 1), 'Player': d.player, 'Team': d.ipl_2026_team.map(team_of), 'Clutch': d.clutch.values, 'Rating': d.clutch.map(clutch_rating), 'Pressure Impact': d.rating_per100.values})
+        html_table(tb, kinds={'#': 'rank', 'Player': 'player', 'Team': 'team', 'Clutch': 'signed', 'Rating': 'label', 'Pressure Impact': 'signed'}, fmts={'Clutch': lambda v: sf(v, 2), 'Pressure Impact': lambda v: sf(v, 1)}, height=500)
     st.markdown('#### How to read a clutch score')
     sc_, tx_ = st.columns([4, 6], gap='large')
-    sc_.dataframe(pd.DataFrame({'Rating': [a for a, b in CLUTCH_SCALE], 'Clutch score': [b for a, b in CLUTCH_SCALE]}), hide_index=True, use_container_width=True, column_config={'Clutch score': st.column_config.NumberColumn(format='%.1f')})
+    with sc_: html_table(pd.DataFrame({'Rating': [a for a, b_ in CLUTCH_SCALE], 'Clutch score': [b_ for a, b_ in CLUTCH_SCALE]}), kinds={'Rating': 'label', 'Clutch score': 'signed'}, fmts={'Clutch score': lambda v: sf(v, 1)})
     tx_.markdown('Most players land between **1 and -1**, with zero neutral. Positive scores are "clutch" and negative scores are "choke". Only a few players are lucky (or unlucky) enough to have extreme scores. A player\'s rating is the label closest to his score.')
     st.caption('Clutch is noisy: it changes a lot between halves of a player\'s career, so it is a hint and not a verdict.')
 
@@ -213,29 +271,32 @@ def page_players():
         inn = st.segmented_control('Innings', ['Both', 'First innings', 'Chase'], default='Both', key='bandinn', label_visibility='collapsed') or 'Both'
         bd = BD[k][BD[k].pid == r.pid]; bd = bd if fam is None else bd[bd.family == fam]; bd = bd if season == 'All' else bd[bd.year == season]
         if inn != 'Both': bd = bd[bd.inn == (1 if inn == 'First innings' else 2)]
-        st.dataframe(band_table(k, r.pid, fam, inn, bd, season), hide_index=True, use_container_width=True)
+        bt = band_table(k, r.pid, fam, inn, bd, season)
+        fm = {c_: (lambda v: f'{v:.0f}') for c_ in bt.columns if c_ in ('Dot ball %',)}; fm.update({'Strike rate': (lambda v: f'{v:.1f}') if k == 'bat' else (lambda v: f'{v:.1f}'), 'Average': lambda v: f'{v:.1f}', 'Win prob. added': lambda v: sf(v, 2)})
+        if k == 'bowl': fm['Economy'] = lambda v: f'{v:.2f}'
+        html_table(bt, kinds={**{c_: 'num' for c_ in bt.columns[1:]}, 'Pressure level': 'player', 'Win prob. added': 'signed'}, fmts=fm, last_total=True)
         st.caption('Pressure level is how much a ball can swing the match. High is the pressure zone and has fewer balls, so its numbers move around more. Balls below 0.5 are nearly decided and are left out of this table and of clutch.')
         bb = bd.groupby('fg').agg(balls=('balls', 'sum'), value=('value', 'sum'), wpa=('wpa', 'sum')).reindex(LAB).fillna(0).reset_index(); n = bb.balls.replace(0, np.nan)
-        bb['per100'] = 100 * bb.value / n; bb['wpa100'] = 100 * bb.wpa / n; bb['x'] = bb.fg.map(BAND_NAME); cA, cB = st.columns(2, gap='large')
-        f = go.Figure(go.Bar(x=bb.x, y=bb.per100, marker_color=PINK, customdata=bb.balls, hovertemplate='%{x}<br>%{y:+.1f} runs per 100 balls<br>%{customdata} balls<extra></extra>')); f.add_hline(y=0, line_color=MUTED)
-        f.update_layout(title=runs_word(k, True) + ' per 100 balls'); cA.plotly_chart(plain(f, 320), use_container_width=True)
-        g = go.Figure(go.Bar(x=bb.x, y=bb.wpa100, marker_color=BLUE, customdata=bb.balls, hovertemplate='%{x}<br>%{y:+.2f} wins per 100 balls<br>%{customdata} balls<extra></extra>')); g.add_hline(y=0, line_color=MUTED)
-        g.update_layout(title='Win probability added per 100 balls'); cB.plotly_chart(plain(g, 320), use_container_width=True)
+        bb['per100'] = 100 * bb.value / n; bb['wpa100'] = 100 * bb.wpa / n; bb['x'] = bb.fg.map(BAND_NAME); cA, cB = st.columns(2, gap='large'); bcol = ['#4A5C93', BLUE, PINK]
+        f = go.Figure(go.Bar(x=bb.x, y=bb.per100, width=0.45, marker=dict(color=bcol, line=dict(width=0)), text=[('' if pd.isna(v) else sf(v, 1)) for v in bb.per100], textposition='outside', textfont=dict(color=TXT), customdata=bb.balls, hovertemplate='%{x}<br>%{y:+.1f} per 100 balls<br>%{customdata} balls<extra></extra>', cliponaxis=False)); f.add_hline(y=0, line_color='rgba(150,165,210,.5)')
+        f.update_layout(title=runs_word(k, True) + ' per 100 balls'); cA.plotly_chart(plain(f, 340), use_container_width=True)
+        g = go.Figure(go.Bar(x=bb.x, y=bb.wpa100, width=0.45, marker=dict(color=bcol, line=dict(width=0)), text=[('' if pd.isna(v) else sf(v, 2)) for v in bb.wpa100], textposition='outside', textfont=dict(color=TXT), customdata=bb.balls, hovertemplate='%{x}<br>%{y:+.2f} wins per 100 balls<br>%{customdata} balls<extra></extra>', cliponaxis=False)); g.add_hline(y=0, line_color='rgba(150,165,210,.5)')
+        g.update_layout(title='Win probability added per 100 balls'); cB.plotly_chart(plain(g, 340), use_container_width=True)
     with t2:
         g = m.groupby('opponent').agg(p_balls=('p_balls', 'sum'), p_value=('p_value', 'sum')).reset_index(); g = g[g.p_balls >= 12]
         if g.empty: st.info('Not enough pressure balls against any single team in this view.')
         else:
-            g['per100'] = 100 * g.p_value / g.p_balls; g['team'] = g.opponent.map(sh); g = g.sort_values('per100')
-            f = go.Figure(go.Bar(x=g.per100, y=g.team, orientation='h', marker_color=PINK, customdata=g.p_balls, hovertemplate='<b>%{y}</b><br>%{x:+.1f} per 100 pressure balls<br>%{customdata} pressure balls<extra></extra>'))
-            f.add_vline(x=0, line_color=MUTED); f.update_layout(title=runs_word(k, True) + ' per 100 pressure balls, by opponent'); st.plotly_chart(plain(f, max(300, 34 * len(g) + 110)), use_container_width=True)
+            g['per100'] = 100 * g.p_value / g.p_balls; g['team'] = g.opponent.map(sh); g = g.sort_values('per100', ascending=False)
+            st.plotly_chart(lollipop(g.team, g.per100, runs_word(k, True) + ' per 100 pressure balls, by opponent', h=max(300, 40 * len(g) + 110), hover=' per 100 pressure balls'), use_container_width=True)
     with t3:
         st.caption('Big games are finals, qualifiers, eliminators and semi-finals.')
         ko = m[m.ko]
         if ko.empty: st.info('No big games in this view.')
         else:
             kk = ko.groupby(['date', 'stage', 'opponent']).agg(balls=('balls', 'sum'), value=('value', 'sum'), wpa=('wpa', 'sum')).reset_index().sort_values('date')
-            kk['date'] = pd.to_datetime(kk.date).dt.date; kk['opponent'] = kk.opponent.map(sh)
-            st.dataframe(kk.rename(columns={'date': 'Date', 'stage': 'Stage', 'opponent': 'Vs', 'balls': 'Balls', 'value': runs_word(k, True), 'wpa': 'Win prob. added'}).round(2), hide_index=True, use_container_width=True)
+            kk['date'] = pd.to_datetime(kk.date).dt.strftime('%d %b %Y'); kk['opponent'] = kk.opponent.map(sh)
+            kk = kk.rename(columns={'date': 'Date', 'stage': 'Stage', 'opponent': 'Vs', 'balls': 'Balls', 'value': runs_word(k, True), 'wpa': 'Win prob. added'})
+            html_table(kk, kinds={'Date': 'text', 'Stage': 'label', 'Vs': 'team', 'Balls': 'num', runs_word(k, True): 'signed', 'Win prob. added': 'signed'}, fmts={runs_word(k, True): lambda v: sf(v, 1), 'Win prob. added': lambda v: sf(v, 2)})
 
 
 def page_how():
@@ -255,10 +316,10 @@ def page_how():
 """)
     with right:
         row = LBO[LBO.scope == scope].sort_values('over'); f = go.Figure()
-        f.add_trace(go.Scatter(x=row.over, y=row['first'], name='First innings', mode='lines', line=dict(color=BLUE, width=3)))
-        f.add_trace(go.Scatter(x=row.over, y=row.chase, name='Chase', mode='lines', line=dict(color=PINK, width=3)))
-        f.add_hline(y=1, line_color=MUTED, line_dash='dash'); f.update_layout(title='Does the model make sense? Average pressure level, over by over', xaxis_title='over', yaxis_title='average pressure level (1 = an average ball)', xaxis_range=[1, 20], yaxis_range=[0, 2.5])
-        st.plotly_chart(plain(f, 420).update_layout(showlegend=True, legend=dict(orientation='h', y=1.12, x=0)), use_container_width=True)
+        f.add_trace(go.Scatter(x=row.over, y=row['first'], name='First innings', mode='lines', line=dict(color=BLUE, width=3.5, shape='spline'), fill='tozeroy', fillcolor='rgba(91,140,255,.12)'))
+        f.add_trace(go.Scatter(x=row.over, y=row.chase, name='Chase', mode='lines', line=dict(color=PINK, width=3.5, shape='spline'), fill='tozeroy', fillcolor='rgba(232,54,143,.12)'))
+        f.add_hline(y=1, line_color='rgba(190,200,230,.5)', line_dash='dot'); f.update_layout(title='Does the model make sense? Average pressure level, over by over', xaxis_title='over', yaxis_title='average pressure level (1 = an average ball)', xaxis_range=[1, 20], yaxis_range=[0, 2.5])
+        st.plotly_chart(plain(f, 420).update_layout(showlegend=True, legend=dict(orientation='h', y=1.12, x=0, font=dict(color=TXT))), use_container_width=True)
         st.markdown('<div class="note">In the first innings there is no target, so no ball matters much more than another. In a chase, the closer the finish, the more every ball matters, so the line climbs towards the last overs. A sensible pressure measure should look like this.</div>', unsafe_allow_html=True)
     st.write(''); st.markdown('**Can you trust it?** It predicts matches it has not seen better than guessing, but it mostly reflects how good a player is overall, and clutch barely repeats from one half of a career to the other. Treat players with close scores as tied.')
 
