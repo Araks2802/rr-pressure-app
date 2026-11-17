@@ -72,8 +72,9 @@ def load():
     m = {k: pd.read_parquet(DATA / f'matches_{k}.parquet').assign(year=lambda x: pd.to_datetime(x.date).dt.year) for k in ('bat', 'bowl')}
     b = {k: pd.read_parquet(DATA / f'bands_{k}.parquet') for k in ('bat', 'bowl')}
     bs = {k: pd.read_parquet(DATA / f'bandstats_{k}.parquet') for k in ('bat', 'bowl')}
-    return r, m, b, pd.read_parquet(DATA / 'leverage_by_over.parquet'), bs
-R, M, BD, LBO, BS = load()
+    ko = {k: pd.read_parquet(DATA / f'ko_{k}.parquet') for k in ('bat', 'bowl')}
+    return r, m, b, pd.read_parquet(DATA / 'leverage_by_over.parquet'), bs, ko
+R, M, BD, LBO, BS, KO = load()
 f1 = lambda x, d=1: '-' if pd.isna(x) else f'{x:+.{d}f}'
 CLUTCH_SCALE = [('Excellent', 2.0), ('Great', 1.0), ('Above Average', 0.5), ('Average', 0.0), ('Below Average', -0.5), ('Poor', -1.0), ('Awful', -2.0)]
 def clutch_rating(x):
@@ -191,7 +192,7 @@ def page_home():
 
 
 def page_impact():
-    st.markdown('<div class="title">Pressure Impact</div><div class="sub">For batters, Pressure Impact is the <b>extra runs</b> a player adds per 100 pressure balls. For bowlers it is the <b>runs saved</b>. Both are compared with an average player in the same situation. Pressure balls are the ones that can swing the match most (about 1 in 7). Players need at least 75 pressure balls to be rated.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="title">Pressure Impact</div><div class="sub">For batters, Pressure Impact is the <b>extra runs</b> a player adds per 100 pressure balls. For bowlers it is the <b>runs saved</b>. Both are compared with an average player in the same situation. Pressure balls are the ones that can swing the match most (about 1 in 8). Players need at least 75 pressure balls to be rated.</div>', unsafe_allow_html=True)
     k = role_pick('imp_role'); d = cur(k)
     if d is None: return
     d = d.sort_values('rating_per100', ascending=False).reset_index(drop=True); t = d.head(10)
@@ -290,13 +291,20 @@ def page_players():
             st.plotly_chart(lollipop(g.team, g.per100, runs_word(k, True) + ' per 100 pressure balls, by opponent', h=max(300, 40 * len(g) + 110), hover=' per 100 pressure balls'), use_container_width=True)
     with t3:
         st.caption('Big games are finals, qualifiers, eliminators and semi-finals.')
-        ko = m[m.ko]
+        ko = KO[k][KO[k].pid == r.pid].copy(); ko = ko if fam is None else ko[ko.family == fam]; ko = ko if season == 'All' else ko[ko.year == season]
         if ko.empty: st.info('No big games in this view.')
         else:
-            kk = ko.groupby(['date', 'stage', 'opponent']).agg(balls=('balls', 'sum'), value=('value', 'sum'), wpa=('wpa', 'sum')).reset_index().sort_values('date')
-            kk['date'] = pd.to_datetime(kk.date).dt.strftime('%d %b %Y'); kk['opponent'] = kk.opponent.map(sh)
-            kk = kk.rename(columns={'date': 'Date', 'stage': 'Stage', 'opponent': 'Vs', 'balls': 'Balls', 'value': runs_word(k, True), 'wpa': 'Win prob. added'})
-            html_table(kk, kinds={'Date': 'text', 'Stage': 'label', 'Vs': 'team', 'Balls': 'num', runs_word(k, True): 'signed', 'Win prob. added': 'signed'}, fmts={runs_word(k, True): lambda v: sf(v, 1), 'Win prob. added': lambda v: sf(v, 2)})
+            mm = m[m.ko].groupby(['match_id']).agg(value=('value', 'sum'), wpa=('wpa', 'sum')).reset_index()
+            kk = ko.merge(mm, on='match_id', how='left').sort_values('match_date')
+            unrated = ~kk.in_model_sample.astype(bool); kk.loc[unrated, ['value', 'wpa']] = np.nan
+            kk['Date'] = pd.to_datetime(kk.match_date).dt.strftime('%d %b %Y') + np.where(unrated, ' *', ''); kk['Vs'] = kk.opponent.map(sh); kk['Stage'] = kk.stage
+            if k == 'bat':
+                out = pd.DataFrame({'Date': kk.Date, 'Stage': kk.Stage, 'Vs': kk.Vs, 'Balls': kk.balls.astype(int), 'Runs': kk.runs.astype(int), 'Out': np.where(kk.outs > 0, 'yes', 'not out'), 'Strike rate': 100 * kk.runs / kk.balls, runs_word(k, True): kk.value, 'Win prob. added': kk.wpa})
+            else:
+                out = pd.DataFrame({'Date': kk.Date, 'Stage': kk.Stage, 'Vs': kk.Vs, 'Balls': kk.balls.astype(int), 'Runs': kk.runs.astype(int), 'Wickets': kk.wickets.astype(int), 'Economy': 6 * kk.runs / kk.balls.replace(0, np.nan), runs_word(k, True): kk.value, 'Win prob. added': kk.wpa})
+            fm = {runs_word(k, True): lambda v: sf(v, 1), 'Win prob. added': lambda v: sf(v, 2), 'Strike rate': lambda v: f'{v:.0f}', 'Economy': lambda v: f'{v:.2f}'}
+            html_table(out, kinds={'Date': 'text', 'Stage': 'label', 'Vs': 'team', 'Balls': 'num', 'Runs': 'num', 'Wickets': 'num', 'Strike rate': 'num', 'Economy': 'num', runs_word(k, True): 'signed', 'Win prob. added': 'signed'}, fmts=fm)
+            if unrated.any(): st.caption('* Rain-reduced match. Runs and balls are shown, but the model does not rate reduced-overs matches, so there is no extra-runs or win-probability figure for it.')
 
 
 def page_how():
@@ -306,7 +314,7 @@ def page_how():
         st.markdown("""
 **1. Win chance.** For every ball we estimate how likely the batting side is to win.
 
-**2. Pressure.** Some balls can swing a match more than others. A **pressure ball** is one in the top band of that swing (about 1 ball in 7), mostly in the middle and end of a chase.
+**2. Pressure.** Some balls can swing a match more than others. A **pressure ball** is one in the top band of that swing (about 1 ball in 8), mostly in the middle and end of a chase.
 
 **3. Pressure Impact.** We score every ball in runs and compare it with an average player in the same spot. For a batter, the score is the **extra runs** he adds; for a bowler it is the **runs saved**. A player's average over his pressure balls, with luck stripped out, is his Pressure Impact.
 
@@ -321,7 +329,7 @@ def page_how():
         f.add_hline(y=1, line_color='rgba(190,200,230,.5)', line_dash='dot'); f.update_layout(title='Does the model make sense? Average pressure level, over by over', xaxis_title='over', yaxis_title='average pressure level (1 = an average ball)', xaxis_range=[1, 20], yaxis_range=[0, 2.5])
         st.plotly_chart(plain(f, 420).update_layout(showlegend=True, legend=dict(orientation='h', y=1.0, x=1, xanchor='right', yanchor='bottom', font=dict(color=TXT))), use_container_width=True)
         st.markdown('<div class="note">In the first innings there is no target, so no ball matters much more than another. In a chase, the closer the finish, the more every ball matters, so the line climbs towards the last overs. A sensible pressure measure should look like this.</div>', unsafe_allow_html=True)
-    st.write(''); st.markdown('**Can you trust it?** It predicts matches it has not seen better than guessing, but it mostly reflects how good a player is overall, and clutch barely repeats from one half of a career to the other. Treat players with close scores as tied.')
+    st.write(''); st.markdown('**Can you trust it?** For bowlers it predicts matches it has not seen better than guessing. For batters it does not yet, so treat batter ratings as a description of what happened, not a forecast. It mostly reflects how good a player is overall, and clutch barely repeats from one half of a career to the other. Treat players with close scores as tied.')
 
 
 {'Home': page_home, 'Pressure Impact': page_impact, 'Clutch': page_clutch, 'Players': page_players, 'How it works': page_how}[page]()
